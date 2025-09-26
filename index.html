@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AgroBot Controller</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" id="manifest-placeholder">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="background-color" content="#FFFFFF">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AgroBot">
+    
+    <!-- App Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0Q0FGNTAIIC8+Cjx0ZXh0IHg9Ijk2IiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+klTwvdGV4dD4KPC9zdmc+">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0Q0FGNTAIIC8+Cjx0ZXh0IHg9Ijk2IiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjgwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+klTwvdGV4dD4KPC9zdmc+">
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Install Prompt Banner -->
+    <div class="install-banner hidden" id="install-banner">
+        <div class="install-banner-content">
+            <div class="install-icon">📱</div>
+            <div class="install-text">
+                <strong>Install AgroBot Controller</strong>
+                <p>Get the full app experience on your home screen</p>
+            </div>
+            <div class="install-actions">
+                <button class="btn btn--primary" id="install-app-btn">Install</button>
+                <button class="btn btn--outline btn--sm" id="dismiss-install">Later</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div class="pull-refresh-indicator" id="refresh-indicator">
+        <div class="refresh-spinner"></div>
+        <span>Pull to refresh...</span>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="language-select" class="form-control">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="tamil">தமிழ்</option>
+        </select>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Dashboard Screen -->
+        <div class="screen active" id="dashboard-screen">
+            <div class="screen-header">
+                <h1 data-translate="dashboard">Dashboard</h1>
+                <button class="voice-btn" id="voice-command" aria-label="Voice command">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="robot-status-card">
+                <div class="robot-info">
+                    <h2>AgroBot Alpha</h2>
+                    <div class="status-indicator" id="robot-status">
+                        <div class="status-dot working" aria-hidden="true"></div>
+                        <span data-translate="working">Working</span>
+                    </div>
+                </div>
+                <div class="connectivity-indicator" id="connectivity" aria-label="Signal strength">
+                    <div class="signal-bars strong">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div class="robot-map" id="robot-map" role="img" aria-label="Robot position map">
+                    <div class="robot-icon" id="robot-position">🤖</div>
+                    <div class="field-boundary"></div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" aria-hidden="true">🔋</div>
+                    <div class="stat-value" id="battery-level">78%</div>
+                    <div class="stat-label" data-translate="battery">Battery</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" aria-hidden="true">📍</div>
+                    <div class="stat-value" id="area-covered">2.5/5.0</div>
+                    <div class="stat-label" data-translate="areaCovered">Area Covered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" aria-hidden="true">⏱️</div>
+                    <div class="stat-value" id="time-remaining">2h 25m</div>
+                    <div class="stat-label" data-translate="timeRemaining">Time Remaining</div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span data-translate="progress">Progress</span>
+                    <span id="progress-percentage">50%</span>
+                </div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-fill" id="progress-fill" style="width: 50%"></div>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn--start" id="start-btn" data-translate="start">Start</button>
+                <button class="btn btn--stop" id="stop-btn" data-translate="stop">Stop</button>
+                <button class="btn btn--emergency" id="emergency-btn" data-translate="emergency">Emergency Stop</button>
+            </div>
+        </div>
+
+        <!-- Task Log Screen -->
+        <div class="screen" id="task-log-screen">
+            <div class="screen-header">
+                <h1 data-translate="taskLog">Task Log</h1>
+                <button class="export-btn" id="export-btn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                    <span data-translate="export">Export</span>
+                </button>
+            </div>
+
+            <div class="chart-container" style="position: relative; height: 300px;">
+                <canvas id="task-chart"></canvas>
+            </div>
+
+            <div class="task-list">
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-date">Sep 22, 2025</div>
+                        <div class="task-stats">3.2 acres • 3h 30m</div>
+                    </div>
+                    <div class="task-status completed" aria-label="Completed">✓</div>
+                </div>
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-date">Sep 21, 2025</div>
+                        <div class="task-stats">2.8 acres • 2h 45m</div>
+                    </div>
+                    <div class="task-status completed" aria-label="Completed">✓</div>
+                </div>
+                <div class="task-item">
+                    <div class="task-info">
+                        <div class="task-date">Sep 20, 2025</div>
+                        <div class="task-stats">4.1 acres • 3h 30m</div>
+                    </div>
+                    <div class="task-status completed" aria-label="Completed">✓</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Feed Screen -->
+        <div class="screen" id="live-feed-screen">
+            <div class="screen-header">
+                <h1 data-translate="liveFeed">Live Feed</h1>
+            </div>
+
+            <div class="video-container">
+                <div class="video-feed">
+                    <div class="video-placeholder">
+                        <div class="camera-icon" aria-hidden="true">📷</div>
+                        <p>Live Camera Feed</p>
+                    </div>
+                    <div class="alert-overlay hidden" id="alert-overlay">
+                        <div class="alert-message">⚠️ Animal Detected</div>
+                    </div>
+                </div>
+                <button class="capture-btn" id="capture-btn">
+                    📸 Capture Photo
+                </button>
+            </div>
+
+            <div class="live-stats">
+                <div class="live-stat">
+                    <span>Status:</span>
+                    <span class="status working">Working</span>
+                </div>
+                <div class="live-stat">
+                    <span>Speed:</span>
+                    <span>2.5 km/h</span>
+                </div>
+                <div class="live-stat">
+                    <span>Last Update:</span>
+                    <span id="last-update">Now</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Path Control Screen -->
+        <div class="screen" id="path-control-screen">
+            <div class="screen-header">
+                <h1 data-translate="pathControl">Path & Control</h1>
+            </div>
+
+            <div class="path-planning">
+                <div class="planning-map" id="planning-map">
+                    <canvas id="path-canvas" aria-label="Field boundary drawing area"></canvas>
+                    <button class="clear-path-btn" id="clear-path">Clear Path</button>
+                </div>
+                <p class="instruction">Tap and drag to draw field boundary</p>
+            </div>
+
+            <div class="manual-controls">
+                <h3>Manual Override</h3>
+                <div class="direction-controls">
+                    <button class="direction-btn" data-direction="up" aria-label="Move forward">↑</button>
+                    <div class="direction-row">
+                        <button class="direction-btn" data-direction="left" aria-label="Turn left">←</button>
+                        <button class="direction-btn stop" data-direction="stop" aria-label="Stop">⏹</button>
+                        <button class="direction-btn" data-direction="right" aria-label="Turn right">→</button>
+                    </div>
+                    <button class="direction-btn" data-direction="down" aria-label="Move backward">↓</button>
+                </div>
+            </div>
+
+            <button class="btn btn--start confirm-btn" id="confirm-path">
+                Confirm & Start Mission
+            </button>
+        </div>
+
+        <!-- Weather Screen -->
+        <div class="screen" id="weather-screen">
+            <div class="screen-header">
+                <h1 data-translate="weather">Weather & Soil</h1>
+            </div>
+
+            <div class="weather-card">
+                <div class="weather-main">
+                    <div class="weather-icon" aria-hidden="true">⛅</div>
+                    <div class="weather-info">
+                        <div class="temperature">28°C</div>
+                        <div class="weather-desc">Partly Cloudy</div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="weather-item">
+                        <span>Humidity:</span>
+                        <span>65%</span>
+                    </div>
+                    <div class="weather-item">
+                        <span>Wind:</span>
+                        <span>12 km/h</span>
+                    </div>
+                    <div class="weather-item">
+                        <span>Rainfall:</span>
+                        <span>0mm</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soil-card">
+                <h3>Soil Conditions</h3>
+                <div class="soil-metrics">
+                    <div class="soil-metric">
+                        <div class="metric-label">Moisture</div>
+                        <div class="metric-value">45%</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <div class="soil-metric">
+                        <div class="metric-label">Temperature</div>
+                        <div class="metric-value">24°C</div>
+                    </div>
+                    <div class="soil-metric">
+                        <div class="metric-label">pH Level</div>
+                        <div class="metric-value">6.8</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recommendations-card">
+                <h3>Planting Recommendations</h3>
+                <div class="recommendation-item">
+                    <div class="rec-icon" aria-hidden="true">🌱</div>
+                    <div class="rec-text">
+                        <strong>Depth:</strong> 2-3 cm for current soil conditions
+                    </div>
+                </div>
+                <div class="recommendation-item">
+                    <div class="rec-icon" aria-hidden="true">📏</div>
+                    <div class="rec-text">
+                        <strong>Spacing:</strong> 15cm between rows recommended
+                    </div>
+                </div>
+                <div class="recommendation-item">
+                    <div class="rec-icon" aria-hidden="true">💧</div>
+                    <div class="rec-text">
+                        <strong>Irrigation:</strong> Schedule watering in 2-3 days
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div class="screen" id="settings-screen">
+            <div class="screen-header">
+                <h1 data-translate="settings">Settings</h1>
+            </div>
+
+            <div class="settings-section">
+                <h3>App Preferences</h3>
+                <div class="setting-item">
+                    <div class="theme-toggle-container">
+                        <label class="theme-toggle-label">
+                            <span data-translate="theme">Theme</span>
+                            <div class="theme-toggle">
+                                <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                                <div class="theme-toggle-slider">
+                                    <div class="theme-toggle-sun">☀️</div>
+                                    <div class="theme-toggle-moon">🌙</div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label class="form-label">Interface Language</label>
+                    <select class="form-control" id="settings-language">
+                        <option value="english">English</option>
+                        <option value="hindi">हिंदी (Hindi)</option>
+                        <option value="tamil">தமிழ் (Tamil)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <button class="btn btn--outline" id="install-pwa-btn">
+                        📱 <span data-translate="install">Install App</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 data-translate="notifications">Notifications</h3>
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <input type="checkbox" class="setting-checkbox" checked>
+                        <span class="checkmark"></span>
+                        Task completion alerts
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <input type="checkbox" class="setting-checkbox" checked>
+                        <span class="checkmark"></span>
+                        Battery low warnings
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-label">
+                        <input type="checkbox" class="setting-checkbox">
+                        <span class="checkmark"></span>
+                        Emergency alerts via SMS
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Robot Configuration</h3>
+                <div class="setting-item">
+                    <label class="form-label">Robot Name</label>
+                    <input type="text" class="form-control" value="AgroBot Alpha">
+                </div>
+                <div class="setting-item">
+                    <label class="form-label">Operating Speed</label>
+                    <select class="form-control">
+                        <option>Slow (1-2 km/h)</option>
+                        <option selected>Medium (2-3 km/h)</option>
+                        <option>Fast (3-4 km/h)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Support</h3>
+                <button class="btn btn--outline">Contact Support</button>
+                <button class="btn btn--outline">View FAQ</button>
+                <button class="btn btn--outline">Tutorial Videos</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>App Information</h3>
+                <div class="app-info">
+                    <p><strong>AgroBot Controller</strong></p>
+                    <p>Version 1.0.0</p>
+                    <p>Offline mode: <span class="status-online" id="offline-status">Online</span></p>
+                    <p>Last sync: <span id="last-sync">Just now</span></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-screen="dashboard-screen" aria-label="Dashboard">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+            </svg>
+            <span data-translate="dashboard">Dashboard</span>
+        </button>
+        <button class="nav-btn" data-screen="task-log-screen" aria-label="Task Log">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <span data-translate="taskLog">Tasks</span>
+        </button>
+        <button class="nav-btn" data-screen="live-feed-screen" aria-label="Live Feed">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+            </svg>
+            <span data-translate="liveFeed">Live</span>
+        </button>
+        <button class="nav-btn" data-screen="path-control-screen" aria-label="Path Control">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+            </svg>
+            <span data-translate="pathControl">Control</span>
+        </button>
+        <button class="nav-btn" data-screen="weather-screen" aria-label="Weather">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z"/>
+            </svg>
+            <span data-translate="weather">Weather</span>
+        </button>
+        <button class="nav-btn" data-screen="settings-screen" aria-label="Settings">
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+            </svg>
+            <span data-translate="settings">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Alert Notifications -->
+    <div class="alert-container" id="alert-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
